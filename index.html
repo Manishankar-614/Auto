@@ -1,1 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vehicle Service Booking System</title>
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: url('https://www.bmw-m.com/content/dam/bmw/marketBMW_M/www_bmw-m_com/topics/magazine-article-pool/2024/wallpaper/m-wallpaper/m4-csl/bmw-m4-csl-mi-05.jpg?imwidth=1440') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 3rem 1rem;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 12px;
+      backdrop-filter: blur(4px);
+      margin: 2rem auto;
+      max-width: 1200px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 2rem;
+      margin: 1rem;
+      width: 360px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #2c3e50;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    input, select, button {
+      padding: 10px 12px;
+      margin: 0.6rem 0;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    select:invalid {
+      color: gray;
+    }
+
+    input:focus, select:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+
+    button {
+      background: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #2980b9;
+    }
+
+    .output {
+      margin-top: 0.5rem;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .success { color: #27ae60; }
+    .error { color: #e74c3c; }
+
+    .history-section {
+      margin-top: 1.5rem;
+    }
+
+    .history-section ul {
+      padding-left: 1rem;
+      list-style-type: disc;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .icon-title {
+      text-align: center;
+      font-size: 2rem;
+      color: #fff;
+      margin-top: 2rem;
+    }
+
+    .icon-title i {
+      margin-right: 0.5rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #27ae60;
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      font-weight: bold;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.5s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.hidden {
+      display: none;
+    }
+
+    .intro {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: rgba(255,255,255,0.9);
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    .intro h3 {
+      color: #2c3e50;
+      margin-bottom: 1rem;
+    }
+
+    .intro p {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #555;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .icon-title {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="icon-title">
+    <i class="fas fa-tools"></i> Vehicle Service Booking System
+  </div>
+
+  <div class="container">
+    <!-- Auth Panel -->
+    <div class="card" id="auth">
+      <h2><i class="fas fa-user-plus"></i> Register</h2>
+      <form id="registerForm">
+        <input type="text" name="username" placeholder="Username" required />
+        <input type="password" name="password" placeholder="Password" required />
+        <button type="submit">Register</button>
+      </form>
+
+      <h2><i class="fas fa-sign-in-alt"></i> Login</h2>
+      <form id="loginForm">
+        <input type="text" name="username" placeholder="Username" required />
+        <input type="password" name="password" placeholder="Password" required />
+        <button type="submit">Login</button>
+      </form>
+      <div id="output" class="output"></div>
+    </div>
+
+    <!-- Booking Panel -->
+    <div class="card hidden" id="booking">
+      <h2><i class="fas fa-calendar-check"></i> Book a Service</h2>
+      <form id="bookingForm">
+        <select name="vehicle" required>
+          <option value="" disabled selected>Select Vehicle</option>
+          <option value="Car">Car</option>
+          <option value="Bike">Bike</option>
+        </select>
+
+        <select name="service" required>
+          <option value="" disabled selected>Select Service</option>
+          <option value="Oil Change">Oil Change</option>
+          <option value="Tire Change">Tire Change</option>
+          <option value="General Service">General Service</option>
+          <option value="Specific Part Check">Specific Part Check</option>
+        </select>
+
+        <input type="date" name="date" required />
+        <button type="submit">Book Now</button>
+      </form>
+
+      <div class="history-section">
+        <button onclick="loadHistory()">View Service History</button>
+        <ul id="historyList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Intro Info Section -->
+  <div class="intro">
+    <h3>Why Book Your Vehicle Service Online?</h3>
+    <p>
+      Welcome to our all-in-one platform designed to simplify your vehicle maintenance experience. Easily register, log in, and schedule service appointments tailored to your needs. Whether it’s a routine oil change, tire replacement, general servicing, or checking a specific part — we’ve got you covered!
+    </p>
+    <p>
+      Save time, track your service history, and ensure your vehicle stays in top condition — all from the comfort of your device.
+    </p>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast hidden">Booked Successfully!</div>
+
+  <script>
+    const registerForm = document.getElementById('registerForm');
+    const loginForm = document.getElementById('loginForm');
+    const bookingForm = document.getElementById('bookingForm');
+    const output = document.getElementById('output');
+    const authCard = document.getElementById('auth');
+    const bookingCard = document.getElementById('booking');
+    const historyList = document.getElementById('historyList');
+
+    function showMessage(message, isSuccess = true) {
+      output.innerText = message;
+      output.className = `output ${isSuccess ? 'success' : 'error'}`;
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.innerText = message;
+      toast.classList.remove('hidden');
+      toast.classList.add('show');
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          toast.classList.add('hidden');
+        }, 500);
+      }, 3000); // Show for 3 seconds
+    }
+
+    registerForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const formData = new FormData(registerForm);
+      const res = await fetch('/register', { method: 'POST', body: formData });
+      const msg = await res.text();
+      showMessage(msg, res.ok);
+    };
+
+    loginForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const formData = new FormData(loginForm);
+      const res = await fetch('/login', { method: 'POST', body: formData });
+      const msg = await res.text();
+      showMessage(msg, res.ok);
+      if (res.ok) {
+        authCard.classList.add('hidden');
+        bookingCard.classList.remove('hidden');
+      }
+    };
+
+    bookingForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const formData = new FormData(bookingForm);
+      const res = await fetch('/book', { method: 'POST', body: formData });
+      const msg = await res.text();
+      showMessage(msg, res.ok);
+      if (res.ok) {
+        bookingForm.reset();
+        showToast("Booked Successfully!");
+      }
+    };
+
+    async function loadHistory() {
+      const res = await fetch('/history');
+      const history = await res.json();
+      historyList.innerHTML = '';
+      history.forEach(item => {
+        const li = document.createElement('li');
+        li.innerText = `${item[0]} - ${item[1]} on ${item[2]} [${item[3]}]`;
+        historyList.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>
 
